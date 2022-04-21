@@ -6,11 +6,11 @@ import json
 import asyncio
 import time
 from functools import wraps
-import config
+from app.config import setting
 import hashlib
 import jwt
 
-TOKEN_SECRET = config.setting['app']['token_secret']
+TOKEN_SECRET = setting['app']['token_secret']
 
 
 def response(code=0, msg="", data={}):
