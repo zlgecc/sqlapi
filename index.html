@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Test SQLrest</title>
+    <script src="https://cdn.staticfile.org/vue/3.2.30/vue.global.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+      .container {
+        display: flex;
+        min-height: 100vh;
+        flex-flow: column nowrap;
+      }
+      .header {
+        height: 60px;
+        background: #4e4d4d;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .body {
+        display: flex;
+        background-color: #3d3d3d;
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .footer {
+        display: flex;
+        background-color: #4e4d4d;
+        color: white;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+      }
+      .search_url {
+        margin-left: 20px;
+        border-radius: 16px;
+        width: 80%;
+        height: 20px;
+        padding: 10px;
+        font-size: 18px;
+        background-color: #272727;
+        color: white;
+        border: none;
+        box-shadow: none;
+      }
+      .search_btn {
+        background-color: #2e7d32;
+        padding: 8px 15px;
+        color: lightgray;
+        border-radius: 5px;
+        margin-left: 5px;
+      }
+      .table_data {
+        color: white;
+        margin-top: 20px;
+        width: 70%;
+        border-collapse: collapse;
+      }
+      /* 斑马条纹 */
+      .table_data tr:nth-child(even) {
+        background-color: #272727; /* 设置偶数行的背景色 */
+      }
+      /* 设置行高和内边距 */
+      .table_data th,
+      .table_data td {
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        padding: 0 0.5em;
+        line-height: 2;
+      }
+      .table_frame {
+        padding: 0 10px;
+        width: 80%;
+        height: 600px;
+        border-radius: 10px;
+        overflow: scroll;
+        box-shadow: inset 0 0 5px #000;
+        margin: 10px;
+      }
+      .token_input {
+        border-radius: 10px;
+        width: 50%;
+        height: 13px;
+        padding: 10px;
+        margin: 0 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <div class="header">
+          <input
+            class="search_url"
+            type="text"
+            placeholder="请输入地址"
+            v-model="query"
+          />
+          <button class="search_btn" @click="search">搜索</button>
+        </div>
+        <div class="body">
+          <div class="table_frame">
+            <table class="table_data">
+              <thead>
+                <tr>
+                  <th v-for="item in table_data.header">{{item}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="data in table_data.data">
+                  <td scope="row" v-for="item in data">{{item}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- <div class="footer">
+          <span>Token</span>
+          <input type="text" class="token_input" v-model="token" />
+        </div> -->
+      </div>
+    </div>
+
+    <script>
+      const App = {
+        data() {
+          return {
+            host: "",
+            query: "/api/user",
+            table_data: {
+              header: [],
+              data: [],
+            },
+            token: "",
+          };
+        },
+        mounted() {
+          console.log("mounted...");
+          this.host = "http://" + document.location.host
+        },
+        methods: {
+          search: function () {
+            const url = `${this.host}${this.query}`;
+            console.log(url)
+
+            const token = this.token
+
+            const table_data = this.table_data
+
+            axios
+              .get(url, {
+                headers: {
+                  'Content-type': 'application/json'
+                },
+              })
+              .then(function (res) {
+                console.log(res.data)
+                list = res.data.data.list;
+                table_head = new Set();
+                table_body = [];
+                list.forEach((data) => {
+                  item_data = [];
+                  for (var key in data) {
+                    table_head.add(key);
+                    item_data.push(data[key]);
+                  }
+                  table_body.push(item_data);
+                });
+                table_data.header = table_head;
+                table_data.data = table_body;
+              })
+              .catch(function (error) {
+                console.log(error);
+              });
+          },
+        },
+      };
+
+      Vue.createApp(App).mount("#app");
+    </script>
+  </body>
+</html>

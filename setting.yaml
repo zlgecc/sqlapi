@@ -1,0 +1,20 @@
+# application config
+app:
+  name: sqlrest
+  port: 8000
+  debug: true
+  open_auth: true
+  token_secret: akhcJgYMneNRNEAIR5zymBz83DHjIj3
+  log_path: ./logs
+
+mysql:
+  host: localhost
+  port: 3306
+  user: root
+  password:
+  db: test_db
+
+admin:
+  username: admin
+  password: Aa123456
+  

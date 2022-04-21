@@ -1,0 +1,36 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: user_wr
+      MYSQL_PASSWORD: Aa_123456
+      MYSQL_ROOT_PASSWORD: Aa_123456
+    networks:
+       - sqlrest_network
+
+  sqlrest_api:
+    build: .
+    image: sqlrest_api
+    container_name: sqlrest_api
+    environment:
+      APP_DEBUG: 0
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_name: test_db
+      DB_USER: user_wr
+      DB_PASSWORD: Aa_123456
+    depends_on:
+      - mysql
+    restart: always
+    networks:
+       - sqlrest_network
+    ports: 
+      - 8000:8000
+    # command: ['/usr/bin/wait-for-it', 'mysql:3306', '--', 'python3', 'server.py']
+    command: ['python3', 'server.py']
+      
+
+networks:
+  sqlrest_network:
