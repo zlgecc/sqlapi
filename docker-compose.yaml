@@ -9,6 +9,8 @@ services:
       MYSQL_PASSWORD: Aa_123456
     ports:
       - 7777:3306
+    volumes:
+      - ./logs/mysql:/var/lib/mysql
     networks:
        - sqlrest_network
 

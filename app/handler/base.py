@@ -14,7 +14,7 @@ TOKEN_SECRET = setting['app']['token_secret']
 
 
 def response(code=0, msg="", data={}):
-    return respoonse_json({"code": code, "msg": msg, "data": data})
+    return respoonse_json({"code": code, "msg": msg, "data": data}, ensure_ascii=False)
 
 def success(result, msg=""):
     return response(code=0, msg=msg, data=result)
@@ -61,10 +61,10 @@ def login_required(wrapped):
             is_authenticated = check_token(token)
 
             if is_authenticated:
-                response = await f(request, *args, **kwargs)
-                return response
+                resp = await f(request, *args, **kwargs)
+                return resp
             else:
-                return respoonse_json({"code": 401, "msg": 'token无效或过期', "data": {}})
+                return response(code=401, msg="token无效或过期")
         return decorated_function
     return decorator(wrapped)
 

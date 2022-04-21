@@ -8,7 +8,7 @@ router = Blueprint("api")
 
 # select data
 @router.route("/api/<table>", methods=["GET"])
-# @login_required
+@login_required
 async def get(request, table):
     # 获取 uri
     query = request.query_string
@@ -24,7 +24,7 @@ async def get(request, table):
 
 # create data
 @router.route("/api/<table>", methods=["POST"])
-# @login_required
+@login_required
 async def post(request, table):
     data = request.json
     obj = InsertSQL(table, data)
@@ -33,7 +33,7 @@ async def post(request, table):
 
 # update data
 @router.route("/api/<table>", methods=["PUT"])
-# @login_required
+@login_required
 async def put(request, table):
     query = request.query_string
     data = request.json
@@ -43,7 +43,7 @@ async def put(request, table):
 
 # delete data
 @router.route("/api/<table>", methods=["DELETE"])
-# @login_required
+@login_required
 async def delete(request, table):
     query = request.query_string
     obj = DeleteSQL(table, query)
