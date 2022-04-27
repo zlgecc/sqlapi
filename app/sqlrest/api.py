@@ -69,8 +69,6 @@ class QuerySQL(Base):
             item = data
         return item
     
-    
-    
     # 数据转换，聚合
     def format_data(self, data):
         from functools import reduce
@@ -102,9 +100,13 @@ class QuerySQL(Base):
                     condi = lambda x:mtd[master_key]==x[relate_key]
                     rtd = filter(condi, duplicate_data)
                     mtd[relation.table] = list(rtd)
+                    mtd = relation.select.remove_table_key(mtd)
                 else:
                     # 一对一
                     mtd[relation.table] = relation.select.parse_field_data(item)
+                    # 去掉内部字段
+                    mtd = relation.select.remove_table_key(mtd)
+                    
             process_data.append(mtd)
         return process_data
    

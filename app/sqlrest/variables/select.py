@@ -53,6 +53,13 @@ class Select:
             key = field.get_alias(use_default=False)
             fields[key] = value
         return fields
+    
+    def remove_table_key(self, data):
+        keys = list(data.keys()).copy()
+        for k in keys:
+            if k.startswith(self.base_table + self.infix):
+                del data[k]
+        return data
 
 
 class Field:
