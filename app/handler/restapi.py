@@ -13,14 +13,14 @@ async def get(request, table):
     # 获取 uri
     query = request.query_string
     obj = QuerySQL(table, query)
-    data = []
+    result = {}
     try:
-        data = await obj.run(db=request.app.db)
+        result = await obj.run(db=request.app.db)
     except Exception as e:
         traceback.print_exc()
         return error(f"Invalid param: {str(e)}")
 
-    return success({"list": data})
+    return success(result)
 
 # create data
 @router.route("/api/<table>", methods=["POST"])

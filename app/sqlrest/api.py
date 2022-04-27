@@ -49,13 +49,14 @@ class QuerySQL(Base):
         list = [dict(i) for i in rows]
         # 输出格式化
         fmt_data = self.format_data(list)
+        result['list'] = fmt_data
         # meta 函数
         if "total" in self.meta:
             count_sql = self.to_count_sql()
             count = await db.get(count_sql)
             result["meta"] = {"total": count[0]}
         
-        return fmt_data
+        return result
     
     def data_key_conversion(self, item, fields, new=False):
         data = {}
