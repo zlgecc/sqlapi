@@ -1,12 +1,7 @@
 # coding: utf-8 
-import os, sys
-osp = os.path
-path = osp.dirname(osp.dirname(osp.dirname(osp.abspath(__file__))))
-sys.path.append(path)
-
 from sqlrest.util import cutout
 import re
-from app.sqlrest.variables.select import Select, Field
+from sqlrest.variables.select import Select, Field
 from itertools import groupby
 
 # parse to_variable format_output
@@ -14,11 +9,12 @@ from itertools import groupby
 class Relation:
 
     def __init__(self, query, base_table):
-        self.master_table = base_table
-
         if not self.is_relation(query):
             return
+        
         self.table, field_match = cutout(r"[\[\{].*?[\]\}]", query)
+        self.master_table = base_table
+        self.join_type = "LEFT"
 
         # 识别连表类型
         if field_match.startswith("["):
@@ -57,15 +53,25 @@ class Relation:
     def create_join_on(self, master, relate):
         return master.table_field + '=' + relate.table_field
 
-
-    def to_variable(self):
-        join_table = self.table
-        relation_table = f" INNER JOIN {join_table} ON {self.join_on}"
-
+    def sql_fields(self):
         # 必须包含关键key字段
-        self.select.array.append(self.relate_field)
+        if self.relate_field not in self.select.field_list:
+            self.select.field_list.append(self.relate_field)
         join_select_field = self.select.to_select_sql()
-        return relation_table, join_select_field
+        return join_select_field
+        
+    def sql_join(self):
+        join_table = self.table
+        relation_table = f" {self.join_type} JOIN {join_table} ON {self.join_on}"
+        return relation_table
+        
+
+    def get_master_key(self, use_default=False):
+        return self.master_field.get_alias(use_default)
+    
+    def get_relate_key(self, use_default=False):
+        return self.relate_field.get_alias(use_default)
+
 
     
     @classmethod
@@ -75,17 +81,3 @@ class Relation:
             return True
         return False
 
-
-if __name__ == "__main__":
-    # ls = ['id:iid', 'name|json', 'nickname']
-    # fieldObj = Select(ls, 'user')
-    # print(fieldObj.to_valiable())
-    # print(str(fieldObj))
-
-    print('================================')
-    relaObj = Relation("camera{id,channel:c,device}", 'record')
-    relation_table, join_field = relaObj.to_variable()
-    print(relation_table)
-    print(join_field)
-    
-    print(relaObj.generate_1vn_sql([1]))

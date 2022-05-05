@@ -59,12 +59,12 @@ def login_required(wrapped):
         async def decorated_function(request, *args, **kwargs):
             token = request.headers.get('token')
             is_authenticated = check_token(token)
-
-            if is_authenticated:
-                resp = await f(request, *args, **kwargs)
-                return resp
-            else:
+            open_auth = setting['app']['open_auth']
+            if open_auth and not is_authenticated:
                 return response(code=401, msg="token无效或过期")
+            
+            resp = await f(request, *args, **kwargs)
+            return resp
         return decorated_function
     return decorator(wrapped)
 

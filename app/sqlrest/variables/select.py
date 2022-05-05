@@ -8,7 +8,7 @@ class Select:
 
     def __init__(self, fields, base_table):
         self.base_table = base_table
-        self.array      = []
+        self.field_list      = []
         
         for field in fields:
             if field == "*" or field == '': 
@@ -21,16 +21,16 @@ class Select:
             # 别名
             field, alias_match = cutout(r':\w*', field)
             field_alias = alias_match.replace(":", "") if alias_match else None
-            self.array.append(Field(name=field, table=base_table, alias=field_alias, conver=field_type))
+            self.field_list.append(Field(name=field, table=base_table, alias=field_alias, conver=field_type))
 
     def __str__(self):
-        print(self.array)
+        print(self.field_list)
         return self.to_select_sql()
     
     # 转 sql
     def to_select_sql(self):
         fields = []
-        for field in self.array:
+        for field in self.field_list:
             fields.append(field.table_field + ' ' + field.get_alias())
         sql = ",".join(fields)
         if sql == "":
@@ -41,19 +41,19 @@ class Select:
     def parse_field_data(self, data):
         fields = {}
         # 查所有 * 
-        if len(self.array) == 0:
+        if len(self.field_list) == 0:
             for k, v in data.items():
                 field = Field(k, self.base_table)
                 data[k] = field.format_value(v)
             return data
-        
-        for field in self.array:
-            value = data[field.get_alias()]
+        for field in self.field_list:
+            alias_key = field.get_alias()
+            value = data[alias_key]
             value = field.format_value(value)
             key = field.get_alias(use_default=False)
             fields[key] = value
         return fields
-    
+
     def remove_table_key(self, data):
         keys = list(data.keys()).copy()
         for k in keys:
