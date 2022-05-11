@@ -43,46 +43,62 @@ class QuerySQL(Base):
     async def run(self, db):
         result = {"list": []}
         sql = self.to_sql()
-        print("=================== sql query =====================")
-        print(sql)
+        print(">>> query to sql:\n", sql)
 
-        rows = await db.query(query=sql)
-        list = [dict(i) for i in rows]
+        rows = await db.fetch_all(query=sql)
+        data_list = [dict(i) for i in rows]
         
-        # 数据处理: 根据group_concat查询子表数据
-        for index, i in enumerate(list):
-            i = self.select.parse_field_data(i)
+        # 加速批量查询
+        rela_ids = {}
+        rela_data = {}
+        for index, val in enumerate(data_list):
+            val = self.select.parse_field_data(val)
             for relation in self.relation:
-                relation_table = relation.table
-                key = f'{relation_table}_ids'
-                group_ids = i[key]
-                
-                rela_data = {} if relation.type == '1v1' else []
-                if group_ids:
-                    group_ids = set(group_ids.split(','))
-                    
-                    fields = relation.sql_fields()
-                    where = ','.join(group_ids)
-                    sql = f'SELECT {fields} FROM {relation_table} WHERE id in ({where})'
-
-                    rela_data = await db.query(query=sql)
-                    rela_data = [relation.select.parse_field_data(dict(i)) for i in rela_data]
-                    # 1v1 返回
-                    if relation.type == '1v1' and len(rela_data):
-                        rela_data = rela_data[0]
-                    i[relation_table] = rela_data
+                key_group_id = f'{relation.table}_ids'
+                if not val[key_group_id] :
+                    val[key_group_id] = ''
+                val[key_group_id] = set(val[key_group_id].split(','))
+                if relation.table in rela_ids.keys():
+                    rela_ids[relation.table] |= val[key_group_id]
                 else:
-                    i[relation_table] = rela_data
-                del i[key]
-            list[index] = i
+                    rela_ids[relation.table] = val[key_group_id]
+            data_list[index] = val
         
-        result['list'] = list
+        for rela_table, ids in rela_ids.items():
+            fields = None
+            relation = None 
+            for rela in self.relation:
+                if rela_table == rela.table:
+                    fields = rela.sql_fields()
+                    relation = rela
+            ids = list(filter(lambda x: x, ids))
+            table_data = []
+            if len(ids) > 0:
+                where = ','.join(ids)
+                sql = f'SELECT {fields} FROM {rela_table} WHERE id in ({where})'
+                print('>>> join sql:\n', sql)
+                query_data = await db.fetch_all(query=sql)
+                table_data = [relation.select.parse_field_data(dict(i)) for i in query_data]
+            rela_data[rela_table] = table_data
+
+        for index, val in enumerate(data_list):
+            for relation in self.relation:
+                key_group_id = f'{relation.table}_ids'
+                ids = val[key_group_id]
+                rdata = list(filter(lambda x: str(x['id']) in ids, rela_data[relation.table]))
+                if relation.type == '1v1':
+                    rdata = rdata[0] if len(rdata) > 0 else {}
+                val[relation.table] = rdata
+                del val[key_group_id]
+            data_list[index] = val
+        
+        result['list'] = data_list
         
         # meta 函数
         if "total" in self.meta:
             count_sql = self.to_count_sql()
-            print('count_sql: ', count_sql)
-            count = await db.get(count_sql)
+            print('>>> count_sql:\n', count_sql)
+            count = await db.fetch_one(count_sql)
             result["meta"] = {"total": count[0]}
         
         return result

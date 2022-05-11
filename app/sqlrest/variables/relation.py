@@ -55,8 +55,13 @@ class Relation:
 
     def sql_fields(self):
         # 必须包含关键key字段
+        id_field = Field('id', self.table)
+        if id_field not in self.select.field_list:
+            self.select.field_list.append(id_field)
+
         if self.relate_field not in self.select.field_list:
             self.select.field_list.append(self.relate_field)
+        
         join_select_field = self.select.to_select_sql()
         return join_select_field
         
