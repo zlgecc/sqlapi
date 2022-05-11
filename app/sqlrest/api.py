@@ -290,8 +290,8 @@ class UpdateSQL(QuerySQL):
             ]),
         )
         # where 
-        if self.where.to_variable():
-            where = " WHERE " + self.where.to_variable()
+        if self.where.to_sql():
+            where = " WHERE " + self.where.to_sql()
             sql += where
         # sqlalcheme parse bug
         sql = sql.replace(":", "\:")
@@ -308,8 +308,8 @@ class DeleteSQL(QuerySQL):
     
     def to_sql(self):
         sql = "DELETE FROM %s " % (self.table_name)
-        if self.where.to_variable():
-            where = " WHERE " + self.where.to_variable()
+        if self.where.to_sql():
+            where = " WHERE " + self.where.to_sql()
             sql += where
         sql = sql.replace(':', '\:')
         return sql
