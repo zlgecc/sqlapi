@@ -52,17 +52,20 @@ class QuerySQL(Base):
         rela_ids = {}
         rela_data = {}
         for index, val in enumerate(data_list):
-            val = self.select.parse_field_data(val)
+            item = self.select.parse_field_data(val)
             for relation in self.relation:
                 key_group_id = f'{relation.table}_ids'
-                if not val[key_group_id] :
-                    val[key_group_id] = ''
-                val[key_group_id] = set(val[key_group_id].split(','))
+                group_ids = val[key_group_id]
+                if not group_ids :
+                    group_ids = ''
+                ids = set(group_ids.split(','))
+                item[key_group_id] = group_ids.split(',')
                 if relation.table in rela_ids.keys():
-                    rela_ids[relation.table] |= val[key_group_id]
+                    rela_ids[relation.table] |= ids
                 else:
-                    rela_ids[relation.table] = val[key_group_id]
-            data_list[index] = val
+                    rela_ids[relation.table] = ids
+            data_list[index] = item
+
         
         for rela_table, ids in rela_ids.items():
             fields = None
@@ -84,8 +87,8 @@ class QuerySQL(Base):
         for index, val in enumerate(data_list):
             for relation in self.relation:
                 key_group_id = f'{relation.table}_ids'
-                ids = val[key_group_id]
-                rdata = list(filter(lambda x: str(x['id']) in ids, rela_data[relation.table]))
+                group_ids = val[key_group_id]
+                rdata = list(filter(lambda x: str(x['id']) in group_ids, rela_data[relation.table]))
                 if relation.type == '1v1':
                     rdata = rdata[0] if len(rdata) > 0 else {}
                 val[relation.table] = rdata
