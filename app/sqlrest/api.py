@@ -45,8 +45,8 @@ class QuerySQL(Base):
         sql = self.to_sql()
         print(">>> query to sql:\n", sql)
 
-        rows = await db.fetch_all(query=sql)
-        data_list = [dict(i) for i in rows]
+        data_list = await db.query(query=sql)
+        # data_list = [dict(i) for i in rows]
         
         # 加速批量查询
         rela_ids = {}
@@ -80,7 +80,7 @@ class QuerySQL(Base):
                 where = ','.join(ids)
                 sql = f'SELECT {fields} FROM {rela_table} WHERE id in ({where})'
                 print('>>> join sql:\n', sql)
-                query_data = await db.fetch_all(query=sql)
+                query_data = await db.query(query=sql)
                 table_data = [relation.select.parse_field_data(dict(i)) for i in query_data]
             rela_data[rela_table] = table_data
 

@@ -10,6 +10,7 @@ from app.config import setting
 import hashlib
 import jwt
 
+
 TOKEN_SECRET = setting['app']['token_secret']
 
 
