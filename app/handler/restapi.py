@@ -26,8 +26,13 @@ async def get(request, table):
 @router.route("/api/<table>", methods=["POST"])
 @login_required
 async def post(request, table):
+    query = request.query_string
     data = request.json
-    obj = InsertSQL(table, data)
+    # 有query触发更新
+    if query:
+        obj = UpdateSQL(table, query, data)
+    else:
+        obj = InsertSQL(table, data)
     result = await obj.run(db=request.app.db)
     return success(result)
 
