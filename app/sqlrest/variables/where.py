@@ -36,9 +36,11 @@ class Where:
                 raise Exception("field error: where opt")
             if opt == "like":
                 value = value.replace("*", "%")
-                return f"{key} {self.opt_map[opt]} '{value}'"
-            else:
-                return f"{key} {self.opt_map[opt]} {value}"
+
+            if not value.isdigit() and opt != 'in':
+                value = f"'{value}'"
+
+            return f"{key} {self.opt_map[opt]} {value}"
         else:
             return f"{key}='{value}'"
 
