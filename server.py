@@ -1,12 +1,13 @@
 # coding: utf-8
 import os
 from sanic import Sanic
-from sanic.log import *
+from sanic.log import logger, access_logger, error_logger
 from sanic import response
 from sanic.exceptions import RequestTimeout, NotFound
 import logging
 
 from app.config import setting
+from app.log import set_logger
 from app.middleware import cors
 from app.sqlrest.mysql import DB
 from app.router import routes
@@ -15,12 +16,15 @@ from app.router import routes
 app_config = setting['app']
 log_path = app_config['log_path']
 os.makedirs(log_path, exist_ok=True)
-logging.basicConfig(filename=f'{log_path}/system.log', level=logging.DEBUG)
-
+logfile = log_path + "/app.log"
+# logging.basicConfig(filename=f'{log_path}/system.log', level=logging.DEBUG)
+set_logger(logger, logfile)
+set_logger(access_logger, logfile)
+set_logger(error_logger, logfile)
 
 # server init
 def server_init():
-    app = Sanic(app_config['name'], configure_logging=LOGGING_CONFIG_DEFAULTS)
+    app = Sanic(app_config['name'])
 
     db_config = setting['mysql']
     db = DB(host=db_config['host'], 
@@ -29,7 +33,10 @@ def server_init():
             user=db_config['user'], 
             password=db_config['password'], 
             sanic=app)
-        
+    
+    # init public
+    app.static('/p', './public')
+
     # server event
     @app.listener("after_server_start")
     async def after_server_start(app, loop):

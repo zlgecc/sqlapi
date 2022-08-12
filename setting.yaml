@@ -12,7 +12,7 @@ mysql:
   port: 3306
   user: root
   password:
-  db: test_db
+  db: mi_platform
 
 admin:
   username: admin

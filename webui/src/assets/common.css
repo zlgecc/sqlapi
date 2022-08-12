@@ -1,0 +1,36 @@
+html, body, #app{
+    margin: 0;
+    padding: 0;
+  }
+  .main {
+    padding: 50px;
+  }
+  .el-container {
+    height: 90vh;
+  }
+  
+  .el-header,
+  .el-footer {
+    text-align: center;
+    line-height: 60px;
+  }
+  
+  .el-aside {
+
+    /* color: #333; */
+    /* text-align: center; */
+    /* line-height: 200px; */
+  }
+  
+  .el-main {
+    background-color: #e9eef3;
+    color: #333;
+    text-align: center;
+    line-height: 160px;
+  }
+  
+  .border {
+    padding: 5px;
+    border: 1px solid white;
+    border-radius: 5px;
+  }
