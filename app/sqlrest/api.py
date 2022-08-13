@@ -97,12 +97,12 @@ class QuerySQL(Base):
         
         result['list'] = data_list
         
-        # meta 函数
+        # meta 函数``
         if "total" in self.meta:
             count_sql = self.to_count_sql()
             print('>>> count_sql:\n', count_sql)
-            count = await db.fetch_one(count_sql)
-            result["meta"] = {"total": count[0]}
+            count = await db.query(count_sql)
+            result["meta"] = {"total": count[0]['cnt']}
         
         return result
   
@@ -121,6 +121,7 @@ class QuerySQL(Base):
             self.parse_order(key, val)
             self.parse_group(key, val)
             self.parse_where(key, val)
+            self.parse_meta(key, val)
                 
     def parse_where(self, key, value):
         if key in self.urlkeys:

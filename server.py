@@ -34,8 +34,14 @@ def server_init():
             password=db_config['password'], 
             sanic=app)
     
-    # init public
-    app.static('/p', './public')
+    # UI public
+    app.static('/admin', './UI/dist/index.html')
+    app.static('/assets', './UI/dist/assets/')
+
+    # ping
+    @app.route("/ping")
+    def ping(request):
+        return response.text('pong')
 
     # server event
     @app.listener("after_server_start")

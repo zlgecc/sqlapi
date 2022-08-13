@@ -3,8 +3,17 @@ import traceback
 from sanic import Blueprint
 from app.sqlrest.api import QuerySQL, InsertSQL, UpdateSQL, DeleteSQL
 from app.handler.base import success, error, login_required
+from app.config import setting
 
 router = Blueprint("api")
+
+@router.route("/api/tables")
+async def get_tables(request):
+    db = request.app.db
+    database = setting['mysql']['db']
+    list = await db.query(f"SELECT table_name FROM information_schema.tables WHERE table_schema='{database}'")
+    tables = [i['table_name'] for i in list]
+    return success(tables)
 
 # select data
 @router.route("/api/<table>", methods=["GET"])
