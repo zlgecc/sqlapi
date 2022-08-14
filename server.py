@@ -4,13 +4,14 @@ from sanic import Sanic
 from sanic.log import logger, access_logger, error_logger
 from sanic import response
 from sanic.exceptions import RequestTimeout, NotFound
-import logging
 
-from app.config import setting
+from app.config import setting, update_config
 from app.log import set_logger
 from app.middleware import cors
 from app.sqlrest.mysql import DB
 from app.router import routes
+
+import argparse
 
 # log init
 app_config = setting['app']
@@ -86,6 +87,19 @@ def server_init():
 
 
 if __name__ == "__main__": 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--db", "-d", type=str)
+    parser.add_argument("--user", "-u", type=str)
+    parser.add_argument("--password", "-p", type=str)
+    parser.add_argument("--host", "-H", type=str)
+    parser.add_argument("--port", "-P", type=int)
+    args = parser.parse_args()
+
+    dbconf = setting['mysql']
+    for k, v in vars(args).items():
+        if v: dbconf[k] = v
+    update_config({"mysql": dbconf})
+
     app = server_init()
     # Register blueprint
     app.blueprint(routes)
