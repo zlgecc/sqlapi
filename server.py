@@ -34,10 +34,11 @@ def server_init():
             user=db_config['user'], 
             password=db_config['password'], 
             sanic=app)
-    
+
     # UI public
-    app.static('/admin', './UI/dist/index.html')
-    app.static('/assets', './UI/dist/assets/')
+    if app_config["debug"]:
+        app.static('/admin', './UI/dist/index.html')
+        app.static('/assets', './UI/dist/assets/')
 
     # ping
     @app.route("/ping")
@@ -93,12 +94,16 @@ if __name__ == "__main__":
     parser.add_argument("--password", "-p", type=str)
     parser.add_argument("--host", "-H", type=str)
     parser.add_argument("--port", "-P", type=int)
+    parser.add_argument("--debug", action="store_true", default=False)
     args = parser.parse_args()
-
+    print(args)
     dbconf = setting['mysql']
     for k, v in vars(args).items():
         if v: dbconf[k] = v
     update_config({"mysql": dbconf})
+    if args.debug:
+        app_config['debug'] = args.debug
+        update_config({"app": app_config})
 
     app = server_init()
     # Register blueprint

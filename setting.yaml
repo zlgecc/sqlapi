@@ -2,7 +2,7 @@
 app:
   name: sqlrest
   port: 8000
-  debug: true
+  debug: false
   open_auth: false
   token_secret: akhcJgYMneNRNEAIR5zymBz83DHjIj3
   log_path: ./logs
