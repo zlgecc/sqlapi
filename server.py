@@ -86,8 +86,7 @@ def server_init():
     
     return app
 
-
-if __name__ == "__main__": 
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--db", "-d", type=str)
     parser.add_argument("--user", "-u", type=str)
@@ -96,7 +95,6 @@ if __name__ == "__main__":
     parser.add_argument("--port", "-P", type=int)
     parser.add_argument("--debug", action="store_true", default=False)
     args = parser.parse_args()
-    print(args)
     dbconf = setting['mysql']
     for k, v in vars(args).items():
         if v: dbconf[k] = v
@@ -105,6 +103,9 @@ if __name__ == "__main__":
         app_config['debug'] = args.debug
         update_config({"app": app_config})
 
+
+if __name__ == "__main__": 
+    parse_args()
     app = server_init()
     # Register blueprint
     app.blueprint(routes)
