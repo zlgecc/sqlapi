@@ -1,31 +1,59 @@
 <template>
-  <div class="main">
-    <el-container class="border">
-      <el-aside width="200px" class="">
-        <el-menu default-active="1">
-          <div style="height:50px; line-height:50px; text-align:center"> DB.tables </div>
-          <el-menu-item :index="item" v-for="item in tables" @click="currentTable=item; loadTable()">{{item}}</el-menu-item>
+  <el-container>
+    <!-- header -->
+    <el-header class='bg-white shadow'>
+        <div class="menu-header"> Table 管理 </div>
+    </el-header>
+    <!-- dialog -->
+    <el-dialog title="保存数据" top="10px" height="80px" width="30%" v-model="dialogVisible" style="">
+      <el-form >
+        <div class="data-item" v-for="(item, index) in Object.keys(form)">
+          <div v-if="item!='id'">
+            <div class='txt-blue'>{{item}}</div>
+            <el-input class="txt-gray" v-model="form[item]" autocomplete="off"></el-input>
+          </div>
+        </div>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="saveData">确 定</el-button>
+        <el-button @click="dialogVisible=false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- body -->
+    <el-container style="width: 90%; margin: 0 auto">
+      <!-- aside -->
+      <el-aside width="200px" class="aside-menu">
+        <el-menu>
+          <el-menu-item v-for="(item, index) in tables" :index="index" @click="currentTable=item; loadTable()" >{{item}}</el-menu-item>
         </el-menu>
       </el-aside>
-
+      <!-- content -->
       <el-container>
-        <el-header class="">{{currentTable}}</el-header>
-        <el-container class="left-border">
-          <el-table :data="tableData"  style="height:75vh;">
-            <el-table-column v-for="label in tableHead" :prop="label" :label="label" :width="50+label.length*10" align="center"/>
-          </el-table>
-        </el-container>
+        <div class='radius bg-red center p1'>{{currentTable}}</div>
+        <!-- table -->
+        <el-table :data="tableData" class="data-table shadow">
+          <el-table-column v-for="label in tableHead" :fixed="label == 'id'" :prop="label" :label="label" :show-overflow-tooltip="true" :min-width="dynamic_width(label)" />
+          <el-table-column fixed="right" label="操作" width="80">
+            <template #default="scope">
+              <el-button type="text" size="small" @click="dialogVisible=true;form=scope.row">编辑</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- footer -->
         <el-footer class="footer">
           <el-pagination layout="prev, pager, next" :total="page.total" :page-size="page.size" @current-change="loadTable"/>
         </el-footer>
       </el-container>
 
     </el-container>
-  </div>
+  </el-container>
 </template>
 
 <script>
-import { reactive, onMounted, toRefs } from "vue";
+import { reactive, onMounted, toRefs, nextTick } from "vue";
+import { ElMessage } from 'element-plus';
 import axios from "axios";
 
 export default {
@@ -35,13 +63,17 @@ export default {
       currentTable: "Admin",
       tableHead: ['id'],
       tableData: [],
-      page: {size: 20, total: 1, pageNum: 1}
+      page: {size: 20, total: 1, pageNum: 1},
+      dialogVisible: false,
+      form: {}
     });
     // define method
     const methods = {
       getTablesMenu() {
         axios.get("/api/tables").then((res) => {
           state.tables = res.data.data
+          state.currentTable = state.tables[0]
+          nextTick(() => document.querySelector(".el-menu-item").click());
         });
       },
       setTable(head, data, total) {
@@ -66,6 +98,26 @@ export default {
             methods.setTable(["id"], [], 0)
           }
         })
+      },
+      dynamic_width(text) {
+        let max_width = 180;
+        let min_width = 20;
+        let dw = text.length*27 
+        dw = dw > max_width ? max_width : dw
+        dw = dw < min_width ? min_width : dw
+        return dw
+      },
+      saveData() {
+        const id = state.form['id'];
+        const url =`/api/${state.currentTable}?id=${id}`
+
+        const data = Object.assign({}, state.form);
+        delete data['id']
+        axios.put(url, JSON.stringify(data)).then((res) => {
+          ElMessage({ message: 'success', type: 'success' });
+          methods.loadTable(state.page.pageNum)
+        })
+        state.dialogVisible = false
       }
     }
     
@@ -85,16 +137,4 @@ export default {
 </script>
 
 <style scoped>
-.el-menu-item{
-  height: 35px;
-  border-bottom: 1px solid;
-}
-.left-border {
-  border-left: 1px solid;
-}
-.footer {
-  display: flex;
-  flex-direction: row-reverse;
-  padding-right: 20px;
-}
 </style>

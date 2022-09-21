@@ -4,34 +4,132 @@ body,
   margin: 0;
   padding: 0;
 }
-.main {
-  padding: 20px;
+body {
+  background-color: #e6e9ee;
 }
+
+/* color */
+.bg-white {
+  background-color: white;
+  color: #303c4b;
+}
+.bg-orange {
+  background-color: peru;
+  color: white;
+}
+.bg-gray {
+  background-color: lightslategrey;
+  color: white;
+}
+.txt-gray {
+  color: lightslategrey;
+  line-height: 0px;
+}
+.bg-red {
+  background-color: rgb(125, 6, 6);
+  color: white;
+}
+.bg-blue {
+  background-color:steelblue;
+  color: white;
+}
+.txt-blue {
+  color:steelblue;
+}
+
+/* shape */
+.h100{
+  height: 100px;
+}
+.w150{
+  width: 150px;
+}
+
 .el-container {
   height: 90vh;
 }
 
-.el-header{
-  text-align: center;
-  line-height: 60px;
-}
-
-.el-aside {
-  /* color: #333; */
-  /* text-align: center; */
-  /* line-height: 200px; */
-}
-
+/* layout */
 .el-main {
   background-color: #e9eef3;
   color: #333;
   text-align: center;
   line-height: 160px;
 }
-
+.center {
+  text-align: center;;
+}
+.footer {
+  display: flex;
+  flex-direction: row-reverse;
+  padding-right: 20px;
+}
+.p1 {
+  padding: .3rem;
+}
+.mr1{
+  margin: .3rem;
+}
 .border {
   padding: 5px;
   border: 1px solid white;
   border-radius: 8px;
 }
+.radius {
+  border-radius: 4px;
 
+}
+.shadow {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 16%);;
+}
+
+/* feature */
+.aside-menu {
+}
+.menu-header {
+  padding: 10px;
+  height:50px; 
+  line-height:40px; 
+  font-size: 18px;
+}
+
+.el-menu {
+  margin-top: 20px;
+  background-color: transparent;
+  padding: 10px;
+}
+.el-menu .is-active {
+  border-radius:6px;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 6%);
+  background-color: white;
+  color:rgb(55, 112, 203)
+}
+.el-menu-item{
+  height: 40px;
+  padding-left: 0px;
+  justify-content: center;
+  /* border-bottom: 1px solid; */
+}
+
+.data-table {
+  height:85vh;
+  padding: 2px 12px;
+}
+.data-item{
+  padding-bottom: .4rem;
+}
+.el-dialog__body{
+  padding-top: 10px;
+  padding-bottom: 0px;
+  max-height: 80vh; 
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.dialog-footer {
+	position: sticky;
+	bottom: 0px;
+  padding-bottom: 10px;
+	text-align: center;
+	background-color: #fff;
+}
