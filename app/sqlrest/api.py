@@ -43,8 +43,7 @@ class QuerySQL(Base):
     async def run(self, db):
         result = {"list": []}
         sql = self.to_sql()
-        print(">>> query to sql:\n", sql)
-
+        print("query to sql>>>\n", sql)
         data_list = await db.query(query=sql)
         # data_list = [dict(i) for i in rows]
         

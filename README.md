@@ -77,7 +77,7 @@ python server.py
 
 `/api/user?field=age|float` 返回时转 float
 
-`/api/jsnon_data?field=data|json` 返回时字符串转 json
+`/api/json_data?field=data|json` 返回时字符串转 json
 
 ### 联表查询
 

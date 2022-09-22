@@ -47,14 +47,17 @@ class DB:
             self.db_args['loop'] = self.sanic.loop
         self.pool = await aiomysql.create_pool(**self.db_args)
 
-    async def query(self, query, *parameters, **kwparameters):
+    async def query(self, query, parse=False, *parameters, **kwparameters):
         """Returns a row list for the given query and parameters."""
         if not self.pool:
             await self.init_pool()
         async with self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 try:
-                    await cur.execute(query, kwparameters or parameters)
+                    if parse:
+                        await cur.execute(query, kwparameters or parameters)
+                    else:
+                        await cur.execute(query)
                     ret = await cur.fetchall()
                 except pymysql.err.InternalError:
                     await conn.ping()

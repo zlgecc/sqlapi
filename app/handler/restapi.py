@@ -11,9 +11,14 @@ router = Blueprint("api")
 async def get_tables(request):
     db = request.app.db
     database = setting['mysql']['db']
-    list = await db.query(f"SELECT table_name FROM information_schema.tables WHERE table_schema='{database}'")
-    tables = [i['table_name'] for i in list]
+    table_list = await db.query(f"SELECT table_name FROM information_schema.tables WHERE table_schema='{database}'")
+    tables = {}
+    for i in table_list:
+        table = i['table_name']
+        table_info = await db.query(f"SELECT column_name name ,data_type type,column_comment comment  FROM information_schema.columns WHERE table_name='{table}'")
+        tables[table] = table_info
     return success(tables)
+
 
 # select data
 @router.route("/api/<table>", methods=["GET"])
