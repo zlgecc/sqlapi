@@ -3,37 +3,38 @@
 import os
 import yaml
 
-def get_env(key, default=""): 
-    val = os.getenv(key)
-    return val if val else default
-
 config_path = f'./setting.yaml'
 with open(config_path, 'r') as conf_file:
     setting = yaml.safe_load(conf_file)
 
 
-def print_env(): 
-    with open(config_path, 'r') as file:
-        print(file.read())
+def get_env(key, default=""): 
+    val = os.getenv(key)
+    return val if val else default
 
 def update_config(conf):
     setting.update(conf)
     return setting
 
-# App config from the environment
-appconf = setting['app']
-appconf['debug']    = get_env("APP_DEBUG", appconf['debug'])
-appconf['log_path'] = get_env("LOG_PATH", appconf['log_path'])
+def get(key="app.name"):
+    """ 先去获取ENV，再去获取setting.yaml
+    例：app.name 先取 RA_APP_NAME 环境变量，再取setting.yaml的setting['app']['name'] 
+    """
+    keys = key.split(".")
+    env_key = f"RA_" + "_".join([i.upper() for i in keys])
+    config_value = get_env(env_key)
+    if not config_value:
+        config_value = setting
+        for k in keys:
+            config_value = config_value.get(k)
+    return config_value
 
-# db config from the environment
-dbconf = setting['mysql']
-mysql_conf = {"mysql": {
-    "host": get_env('DB_HOST', dbconf['host']),
-    "port": get_env('DB_PORT', dbconf['port']),
-    'db': get_env('DB_NAME', dbconf['db']),
-    'user': get_env('DB_USER', dbconf['user']),
-    'password': get_env('DB_PASSWORD', dbconf['password'])
-}}
-update_config(mysql_conf)
+def set(key, value):
+    keys = key.split(".")
+    config_value = setting
+    for k in keys:
+        config_value = config_value[k]
+    config_value = value
+    print(setting)
 
 

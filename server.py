@@ -5,7 +5,7 @@ from sanic.log import logger, access_logger, error_logger
 from sanic import response
 from sanic.exceptions import RequestTimeout, NotFound
 
-from app.config import setting, update_config
+from app import config
 from app.log import set_logger
 from app.middleware import cors
 from app.sqlrest.mysql import DB
@@ -14,8 +14,7 @@ from app.router import routes
 import argparse
 
 # log init
-app_config = setting['app']
-log_path = app_config['log_path']
+log_path = config.get('app.log_path')
 os.makedirs(log_path, exist_ok=True)
 logfile = log_path + "/app.log"
 # logging.basicConfig(filename=f'{log_path}/system.log', level=logging.DEBUG)
@@ -25,20 +24,18 @@ set_logger(error_logger, logfile)
 
 # server init
 def server_init():
-    app = Sanic(app_config['name'])
+    app = Sanic(config.get('app.name'))
 
-    db_config = setting['mysql']
-    db = DB(host=db_config['host'], 
-            port=int(db_config['port']), 
-            database=db_config['db'], 
-            user=db_config['user'], 
-            password=db_config['password'], 
+    db = DB(host=config.get('mysql.host'), 
+            port=config.get('mysql.port'), 
+            database=config.get('mysql.db'), 
+            user=config.get('mysql.user'), 
+            password=config.get('mysql.password'), 
             sanic=app)
 
     # UI public
-    if app_config["debug"]:
-        app.static('/admin', './UI/dist/index.html')
-        app.static('/assets', './UI/dist/assets/')
+    app.static('/admin', './UI/dist/index.html')
+    app.static('/assets', './UI/dist/assets/')
 
     # ping
     @app.route("/ping")
@@ -95,13 +92,13 @@ def parse_args():
     parser.add_argument("--port", "-P", type=int)
     parser.add_argument("--debug", action="store_true", default=False)
     args = parser.parse_args()
-    dbconf = setting['mysql']
-    for k, v in vars(args).items():
-        if v: dbconf[k] = v
-    update_config({"mysql": dbconf})
-    if args.debug:
-        app_config['debug'] = args.debug
-        update_config({"app": app_config})
+    # update config
+    for key, val in vars(args).items():
+        if key in ['db', 'user', 'password', 'host', 'port'] and val:
+            config.set(f'mysql.{key}', val)
+        if key in ['debug'] and val:
+            config.set(f'app.{key}', val)
+  
 
 
 if __name__ == "__main__": 
@@ -109,4 +106,4 @@ if __name__ == "__main__":
     app = server_init()
     # Register blueprint
     app.blueprint(routes)
-    app.run(host="0.0.0.0", port=app_config['port'], debug=app_config['debug'])
+    app.run(host="0.0.0.0", port=config.get('app.port'), debug=config.get('app.debug'))

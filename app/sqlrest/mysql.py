@@ -61,7 +61,7 @@ class DB:
                     ret = await cur.fetchall()
                 except pymysql.err.InternalError:
                     await conn.ping()
-                    await cur.execute(query, kwparameters or parameters)
+                    await cur.execute(query)
                     ret = await cur.fetchall()
                 return ret
 

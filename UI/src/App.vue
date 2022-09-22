@@ -1,11 +1,28 @@
 <template>
   <el-container>
     <!-- header -->
-    <el-header class='bg-white shadow'>
-      <div class="menu-header"> Table 管理 </div>
+    <el-header class='flex bg-white shadow'>
+      <div class="menu-header" @click="loginDialog=true"> Table 管理 </div>
     </el-header>
-    <!-- dialog -->
-    <el-dialog title="详情" top="10px" height="80px" width="30%" v-model="dialogVisible" style="">
+    <!-- login dialog -->
+    <el-dialog title="登录" height="80px" width="30%" 
+      fullscreen=true 
+      show-close="false"
+      v-model="loginDialog">
+      <el-form class="login-form">
+        <el-form-item label="用户">
+          <el-input v-model="loginForm['username']" required></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="loginForm['password']" required></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="login">登录</el-button>
+      </div>
+    </el-dialog>
+    <!-- data dialog -->
+    <el-dialog title="详情" top="10px" height="80px" width="30%" v-model="dataDialog" style="">
       <el-form>
         <div class="data-item" v-for="(item, index) in Object.keys(form)">
           <div v-if="item!='id'">
@@ -16,7 +33,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="saveData">保 存</el-button>
-        <el-button @click="dialogVisible=false">取 消</el-button>
+        <el-button @click="dataDialog=false">取 消</el-button>
       </div>
     </el-dialog>
 
@@ -75,7 +92,7 @@
 </template>
 
 <script>
-import { reactive, onMounted, toRefs, nextTick } from "vue";
+import { reactive, onMounted, toRefs, nextTick, watch } from "vue";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 
@@ -84,12 +101,15 @@ export default {
     const state = reactive({
       tableInfo: {},
       tables: [],
-      currentTable: "",
+      currentTable: "Null",
       tableHead: [],
       tableData: [],
       page: { size: 20, total: 1, pageNum: 1 },
-      dialogVisible: false,
+      dataDialog: false,
+      loginDialog: true,
       form: {},
+      loginForm: {"username": "", "password": ""},
+      isLogin: false,
       searchItems: [],
     });
 
@@ -97,18 +117,28 @@ export default {
     onMounted(() => {
       // do something
       console.log("mounted start...");
-      methods.getTablesMenu();
-
-      document.addEventListener("keydown", methods.keyboardShortcuts);
+      if (state.isLogin){
+        methods.initTablesMenu();
+        document.addEventListener("keydown", methods.keyboardShortcuts);
+      }
     });
+    // watch
+    watch(()=>state.isLogin, ()=> {
+      if (state.isLogin){
+        methods.initTablesMenu();
+        document.addEventListener("keydown", methods.keyboardShortcuts);
+      }
+    })
     // define method
     const methods = {
+      // 快捷键
       keyboardShortcuts(e) {
         if (e.keyCode === 13) {
           methods.searchData();
         }
       },
-      getTablesMenu() {
+      // 数据展示
+      initTablesMenu() {
         axios.get("/api/tables").then((res) => {
           const responseData = res.data.data;
           state.tableInfo = responseData;
@@ -140,9 +170,14 @@ export default {
         });
         console.log(url, params);
         axios.get(url, { params: params }).then((res) => {
-          const total = res.data.data.meta.total;
-          const data = res.data.data.list;
-          methods.setTable(data, total);
+          if (res.status == 200) {
+            const total = res.data.data.meta.total;
+            const data = res.data.data.list;
+            methods.setTable(data, total);
+          } else {
+            ElMessage({ message: res.data.msg, type: "error" });
+          }
+          
         });
       },
       dynamic_width(text) {
@@ -153,14 +188,16 @@ export default {
         dw = dw < min_width ? min_width : dw;
         return dw;
       },
+      // 数据操作
       openDialog(data) {
-        state.dialogVisible=true;
+        state.dataDialog=true;
         if (data) {
           state.form = data;
         } else {
           let data = {}
-          state.tableHead.map(item => {
-            data[item] = '';
+          console.log(state.tableInfo[state.currentTable])
+          state.tableInfo[state.currentTable].map(item => {
+            data[item['name']] = item['value'];
           })
           state.form = data;
         }
@@ -172,8 +209,12 @@ export default {
           const data = Object.assign({}, state.form);
           delete data["id"];
           axios.put(url, JSON.stringify(data)).then((res) => {
-            ElMessage({ message: "success", type: "success" });
-            methods.loadTable(state.page.pageNum);
+            if (res.status == 200) {
+              ElMessage({ message: "success", type: "success" });
+              methods.loadTable(state.page.pageNum);
+            } else {
+              ElMessage({ message: res.data.msg, type: "error" });
+            }
           });
         } else {
           const url = `/api/${state.currentTable}`;
@@ -189,14 +230,18 @@ export default {
             return false;
           }
           axios.post(url, JSON.stringify(data)).then((res) => {
-            ElMessage({ message: "success", type: "success" });
-            methods.loadTable(state.page.pageNum);
+            if (res.status == 200) {
+              ElMessage({ message: "success", type: "success" });
+              methods.loadTable(state.page.pageNum);
+            } else {
+              ElMessage({ message: res.data.msg, type: "error" });
+            }
           });
         }
 
-        state.dialogVisible = false;
+        state.dataDialog = false;
       },
-
+      // 搜索
       searchData() {
         if (state.searchItems.length > 0) {
           methods.loadTable(1);
@@ -207,6 +252,22 @@ export default {
       searchItemAdd() {
         state.searchItems.push({ key: "", value: "" });
       },
+      // login
+      login() {
+        console.log('login', state.loginForm);
+        const url = "/v1/auth"
+        axios.post(url, JSON.stringify(state.loginForm)).then((res) => {
+          console.log(res)
+          if(res.status == 200) {
+            ElMessage({ message: "login success", type: "success" });
+            state.isLogin = true;
+            state.loginDialog = false;
+          } else {
+            ElMessage({ message: res.data.msg, type: "error" });
+          }
+          
+        });
+      }
     };
 
     return {

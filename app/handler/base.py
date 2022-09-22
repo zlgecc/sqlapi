@@ -6,12 +6,12 @@ import json
 import asyncio
 import time
 from functools import wraps
-from app.config import setting
+from app import config
 import hashlib
 import jwt
 
 
-TOKEN_SECRET = setting['app']['token_secret']
+TOKEN_SECRET = config.get("app.token_secret")
 
 
 def response(code=0, msg="", data={}):
@@ -60,7 +60,7 @@ def login_required(wrapped):
         async def decorated_function(request, *args, **kwargs):
             token = request.headers.get('token')
             is_authenticated = check_token(token)
-            open_auth = setting['app']['open_auth']
+            open_auth = config.get('app.open_auth')
             if open_auth and not is_authenticated:
                 return response(code=401, msg="token无效或过期")
             

@@ -13,6 +13,11 @@ export default defineConfig({
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/a/, '')
       },
+      "/v1": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/a/, '')
+      },
     }
    
   },

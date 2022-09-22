@@ -99,7 +99,9 @@ body {
   line-height:40px; 
   font-size: 18px;
 }
-
+.flex {
+  display: flex;
+}
 .el-menu {
   margin-top: 20px;
   background-color: transparent;
@@ -151,4 +153,9 @@ body {
 }
 .search-value{
   width: 50%;
+}
+.login-form {
+  padding-top: 15vh;
+  width: 300px;
+  margin: 0 auto;
 }
