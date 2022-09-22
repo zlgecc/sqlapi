@@ -5,16 +5,13 @@
       <div class="menu-header" @click="loginDialog=true"> Table 管理 </div>
     </el-header>
     <!-- login dialog -->
-    <el-dialog title="登录" height="80px" width="30%" 
-      fullscreen=true 
-      show-close="false"
-      v-model="loginDialog">
+    <el-dialog title="登录" height="80px" width="30%" fullscreen=true v-model="loginDialog">
       <el-form class="login-form">
         <el-form-item label="用户">
           <el-input v-model="loginForm['username']" required></el-input>
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="loginForm['password']" required></el-input>
+          <el-input v-model="loginForm['password']" required show-password></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -39,19 +36,16 @@
 
     <!-- body -->
     <el-container style="width: 90%; margin: 0 auto">
-      <!-- aside -->
-      <el-aside width="200px" class="aside-menu">
+      <!-- aside menu-->
+      <el-aside width="280px" class="aside-menu">
         <el-menu>
           <el-menu-item v-for="(item, index) in tables" :index="index" @click="currentTable=item; loadTable()">{{item}}</el-menu-item>
         </el-menu>
       </el-aside>
       <!-- content -->
       <el-container>
-        <div class='radius bg-red txt-center p1'>
-          {{currentTable}}
-        </div>
         <!-- search -->
-        <div class="p1">
+        <div class="p2">
           <div class="operator">
             <el-button round size="small" class="shadow" @click="openDialog(false)">新增</el-button>
             <el-button round type="primary" size="small" class=" shadow" @click="searchData">搜索</el-button>
@@ -71,6 +65,11 @@
             </div>
           </div>
         </div>
+        
+        <div class='radius bg-red txt-center '>
+          {{currentTable}}
+        </div>
+        
         <!-- table -->
         <el-table :data="tableData" class="data-table shadow">
           <el-table-column v-for="label in tableHead" :fixed="label == 'id'" :prop="label" :label="label" :show-overflow-tooltip="true" :min-width="dynamic_width(label)" />
@@ -183,7 +182,7 @@ export default {
       dynamic_width(text) {
         let max_width = 180;
         let min_width = 20;
-        let dw = text.length * 27;
+        let dw = text.length * 28;
         dw = dw > max_width ? max_width : dw;
         dw = dw < min_width ? min_width : dw;
         return dw;

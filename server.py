@@ -25,13 +25,13 @@ set_logger(error_logger, logfile)
 # server init
 def server_init():
     app = Sanic(config.get('app.name'))
-
-    db = DB(host=config.get('mysql.host'), 
-            port=config.get('mysql.port'), 
-            database=config.get('mysql.db'), 
-            user=config.get('mysql.user'), 
-            password=config.get('mysql.password'), 
-            sanic=app)
+    dbconf = dict(host=config.get('mysql.host'), 
+        port=int(config.get('mysql.port')), 
+        database=config.get('mysql.db'), 
+        user=config.get('mysql.user'), 
+        password=config.get('mysql.password')
+    )
+    db = DB(sanic=app, **dbconf)
 
     # UI public
     app.static('/admin', './UI/dist/index.html')
