@@ -30,7 +30,7 @@ body {
   color: white;
 }
 .bg-blue {
-  background-color:steelblue;
+  background-color: #06517d;
   color: white;
 }
 .txt-blue {
@@ -58,6 +58,11 @@ body {
 }
 
 /* layout */
+.header {
+  color: white;
+  background-color: #2e3031;
+  box-shadow: 0 2px 8px 0 rgb(0 0 0 / 66%);;
+}
 .el-main {
   background-color: #e9eef3;
   color: #333;
@@ -126,9 +131,13 @@ body {
   justify-content: left;
 }
 
+.el-table thead {
+  color:rgb(55, 112, 203)
+}
 .data-table {
   height:85vh;
   padding: 2px 12px;
+  font-size: .5rem;
 }
 .data-item{
   padding-bottom: .4rem;
@@ -146,6 +155,13 @@ body {
   padding-bottom: 10px;
 	text-align: center;
 	background-color: #fff;
+}
+.operator {
+  display: flex;
+  flex-direction: row-reverse;
+}
+.operator button {
+  margin: 5px;
 }
 .search-item {
   /* width: 60%; */

@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <!-- header -->
-    <el-header class='flex bg-white shadow'>
+    <el-header class='flex header'>
       <div class="menu-header" @click="loginDialog=true"> Table 管理 </div>
     </el-header>
     <!-- login dialog -->
@@ -66,13 +66,13 @@
           </div>
         </div>
         
-        <div class='radius bg-red txt-center '>
+        <div class='radius bg-blue txt-center '>
           {{currentTable}}
         </div>
         
         <!-- table -->
         <el-table :data="tableData" class="data-table shadow">
-          <el-table-column v-for="label in tableHead" :fixed="label == 'id'" :prop="label" :label="label" :show-overflow-tooltip="true" :min-width="dynamic_width(label)" />
+          <el-table-column v-for="label in tableHead" :prop="label" :label="label" :show-overflow-tooltip="true" :min-width="dynamic_width(label)" />
           <el-table-column fixed="right" label="操作" width="80">
             <template #default="scope">
               <el-button type="text" size="small" @click="openDialog(scope.row)">编辑</el-button>
@@ -181,8 +181,8 @@ export default {
       },
       dynamic_width(text) {
         let max_width = 180;
-        let min_width = 20;
-        let dw = text.length * 28;
+        let min_width = 50;
+        let dw = text.length * 15;
         dw = dw > max_width ? max_width : dw;
         dw = dw < min_width ? min_width : dw;
         return dw;
