@@ -6,9 +6,9 @@ from sanic import response
 from sanic.exceptions import RequestTimeout, NotFound
 
 from app import config
+from app.database import Database
 from app.log import set_logger
 from app.middleware import cors
-from app.sqlrest.mysql import DB
 from app.router import routes
 
 import argparse
@@ -25,13 +25,17 @@ set_logger(error_logger, logfile)
 # server init
 def server_init():
     app = Sanic(config.get('app.name'))
-    dbconf = dict(host=config.get('mysql.host'), 
-        port=int(config.get('mysql.port')), 
-        database=config.get('mysql.db'), 
-        user=config.get('mysql.user'), 
-        password=config.get('mysql.password')
+    
+    dbconf = dict(
+        host=config.get('database.host'), 
+        port=int(config.get('database.port')), 
+        database=config.get('database.db'), 
+        user=config.get('database.user'), 
+        password=config.get('database.password'),
+        type=config.get('database.type')
     )
-    db = DB(sanic=app, **dbconf)
+    # db = DB(sanic=app, **dbconf)
+    app.db = Database(sanic=app, **dbconf).instance()
 
     # UI public
     app.static('/admin', './UI/dist/index.html')
@@ -45,7 +49,7 @@ def server_init():
     # server event
     @app.listener("after_server_start")
     async def after_server_start(app, loop):
-        await db.init_pool()
+        return 
 
     # middleware
     @app.middleware("request")

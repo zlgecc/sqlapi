@@ -17,10 +17,10 @@ TOKEN_SECRET = config.get("app.token_secret")
 def response(code=0, msg="", data={}):
     return respoonse_json({"code": code, "msg": msg, "data": data}, ensure_ascii=False)
 
-def success(result, msg=""):
+def success(result, msg="success"):
     return response(code=0, msg=msg, data=result)
 
-def error(msg="", result={}):
+def error(msg="error", result={}):
     return response(code=500, msg=msg, data=result)
 
 

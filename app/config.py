@@ -3,7 +3,7 @@
 import os
 import yaml
 
-config_path = f'./setting.yaml'
+config_path = f'./config.yml'
 with open(config_path, 'r') as conf_file:
     setting = yaml.safe_load(conf_file)
 
@@ -17,8 +17,8 @@ def update_config(conf):
     return setting
 
 def get(key="app.name"):
-    """ 先去获取ENV，再去获取setting.yaml
-    例：app.name 先取 RA_APP_NAME 环境变量，再取setting.yaml的setting['app']['name'] 
+    """ 先去获取ENV，再去获取 config.yml
+    例：app.name 先取 RA_APP_NAME 环境变量，再取 config.yml 的config['app']['name'] 
     """
     keys = key.split(".")
     env_key = f"RA_" + "_".join([i.upper() for i in keys])

@@ -7,7 +7,7 @@ import aiomysql
 import pymysql
 
 
-class DB:
+class Mysql:
     """A lightweight wrapper around aiomysql.Pool for easy to use
     """
     def __init__(self, host, port, database, user, password,

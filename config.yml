@@ -1,0 +1,29 @@
+# application config
+app:
+  name: sqlrest
+  port: 8000
+  debug: true
+  open_auth: false
+  token_secret: akhcJgYMneNRNEAIR5zymBz83DHjIj3
+  log_path: ./logs
+
+database:
+  # 数据库类型
+  # type: sqlite
+  type: mysql
+  # host: localhost
+  # port: 3306
+  # user: root
+  # password:
+  # db: database
+  host: 192.168.9.7
+  port: 24777
+  user: root
+  password: Aa123456
+  db: label_db
+
+webUI:
+  open: true
+  user: admin
+  password: Aa123456
+  
