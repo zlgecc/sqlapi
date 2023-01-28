@@ -44,31 +44,40 @@ class Sqlite:
 
         return res
 
+    # high level interface
+    # 创建表
+    async def create_table(self, table):
+        sql = f'''CREATE TABLE `{table}`( 
+            `id` PRIMARY KEY NOT NULL,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+        ) '''
+        print(">>>", sql)
+        res = await self.execute(sql)
+        return res
+    # 所有表
+    async def tables(self, database):
+        sql = f"SELECT name FROM sqlite_master WHERE type='table'"
+        print(">>>", sql)
+        tables = await self.query(sql)
+        table_list = list(map(lambda x: x['name'], tables))
+        return table_list
+    
+    # 表结构
+    async def table_fields(self, name):
+        sql = f"PRAGMA table_info({name})"
+        print(">>>", sql)
+        table_info = await self.query(sql)
+        return table_info
 
-    async def table_insert(self, table_name, item):
-        '''item is a dict : key is mysql table field'''
-        if not self.conn:
-            await self.connect()
-
-        fields = list(item.keys())
-        values = list(item.values())
-        fieldstr = ','.join(fields)
-        valstr = ','.join(['?'] * len(item))
-        sql = 'INSERT INTO %s (%s) VALUES(%s)' % (table_name, fieldstr, valstr)
-        print(sql)
-        cursor = await self.conn.execute(sql, values)
-        await self.conn.commit()
-        return cursor.lastrowid
-
-    async def table_update(self, table_name, updates, field_where, value_where):
-        upsets = []
-        values = []
-        for k, v in updates.items():
-            s = '%s=%%s' % k
-            upsets.append(s)
-            values.append(v)
-        upsets = ','.join(upsets)
-        sql = 'UPDATE %s SET %s WHERE %s="%s"' % (table_name, upsets, field_where, value_where)
-        cursor = await self.conn.execute(sql, *(values))
-        await self.conn.commit()
-        return cursor.rowcount
+    # 添加字段
+    async def add_field(self, table, field, type):
+        sql = f"ALTER TABLE {table} ADD COLUMN {field} {type}"
+        print(">>>", sql)
+        await self.execute(sql)
+        return
+    
+    async def drop_field(self, table, field):
+        sql = f"ALTER TABLE {table} DROP COLUMN {field}"
+        print(">>>", sql)
+        await self.execute(sql)
+        return

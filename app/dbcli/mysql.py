@@ -96,49 +96,40 @@ class Mysql:
                 return cur.lastrowid
 
     # high level interface
-    async def table_has(self, table_name, field, value):
-        sql = 'SELECT {} FROM {} WHERE {}=%s limit 1'.format(field, table_name, field)
-        d = await self.get(sql, value)
-        return d
+    # 创建表
+    async def create_table(self, table):
+        sql = f'''CREATE TABLE `{table}`( 
+            `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4'''
+        print(">>>", sql)
+        res = await self.execute(sql)
+        return res
+    # 所有表
+    async def tables(self, database):
+        sql = f"SELECT table_name FROM information_schema.tables WHERE table_schema='{database}'"
+        print(">>>", sql)
+        tables = await self.query(sql)
+        table_list = list(map(lambda x: x['table_name'], tables))
+        return table_list
+    
+    # 表结构
+    async def table_fields(self, name):
+        sql = f"SELECT column_name name,data_type type,column_comment comment,column_default value FROM information_schema.columns WHERE table_name='{name}'"
+        print(">>>", sql)
+        table_info = await self.query(sql)
+        return table_info
 
-    async def table_insert(self, table_name, item, ignore_duplicated=True):
-        '''item is a dict : key is mysql table field'''
-        fields = list(item.keys())
-        values = list(item.values())
-        fieldstr = ','.join(fields)
-        valstr = ','.join(['%s'] * len(item))
-        sql = 'INSERT INTO %s (%s) VALUES(%s)' % (table_name, fieldstr, valstr)
-        try:
-            last_id = await self.execute(sql, *values)
-            return last_id
-        except Exception as e:
-            if ignore_duplicated and e.args[0] == 1062:
-                # just skip duplicated item
-                return 0
-            traceback.print_exc()
-            print('sql:', sql)
-            print('item:')
-            for i in range(len(fields)):
-                vs = str(values[i])
-                if len(vs) > 300:
-                    print(fields[i], ' : ', len(vs), type(values[i]))
-                else:
-                    print(fields[i], ' : ', vs, type(values[i]))
-            raise e
-
-    async def table_update(self, table_name, updates,
-                     field_where, value_where):
-        '''updates is a dict of {field_update:value_update}'''
-        upsets = []
-        values = []
-        for k, v in updates.items():
-            s = '%s=%%s' % k
-            upsets.append(s)
-            values.append(v)
-        upsets = ','.join(upsets)
-        sql = 'UPDATE %s SET %s WHERE %s="%s"' % (
-            table_name,
-            upsets,
-            field_where, value_where,
-        )
-        await self.execute(sql, *(values))
+    # 添加字段
+    async def add_field(self, table, field, type):
+        sql = f"ALTER TABLE {table} ADD {field} {type}"
+        print(">>>", sql)
+        res = await self.execute(sql)
+        return res
+    
+    async def drop_field(self, table, field):
+        sql = f"ALTER TABLE {table} DROP {field}"
+        print(">>>", sql)
+        res = await self.execute(sql)
+        return res
