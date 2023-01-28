@@ -4,14 +4,8 @@ from sanic.log import logger
 from sanic.response import json as respoonse_json
 import json
 import asyncio
-import time
 from functools import wraps
-from app import config
-import hashlib
-import jwt
-
-
-TOKEN_SECRET = config.get("app.token_secret")
+from app import config, token
 
 
 def response(code=0, msg="", data={}):
@@ -23,43 +17,13 @@ def success(result, msg="success"):
 def error(msg="error", result={}):
     return response(code=500, msg=msg, data=result)
 
-
-
-def encode_token(data):
-    ts = time.time()
-    data['ts'] = ts
-    token = jwt.encode(data, TOKEN_SECRET, algorithm="HS256")
-    return token
-    
-    
-def hash_md5(string):
-    m = hashlib.md5()
-    m.update(string.encode('utf-8'))
-    return m.hexdigest()
-
-
-def check_token(token):
-    if not token:
-        return False
-    try:
-        curr_ts = time.time()
-        info = jwt.decode(token, TOKEN_SECRET, algorithms=["HS256"])
-        ts = info.get('ts', 0)
-        if curr_ts - ts > 60*60*24*7:
-            return False
-    except jwt.exceptions.InvalidTokenError:
-        return False
-    else:
-        return True
-    
-
 # token校验装饰器
 def login_required(wrapped):
     def decorator(f):
         @wraps(f)
         async def decorated_function(request, *args, **kwargs):
-            token = request.headers.get('token')
-            is_authenticated = check_token(token)
+            token_str = request.headers.get('token')
+            is_authenticated = token.check_jwt(token_str)
             open_auth = config.get('app.open_auth')
             if open_auth and not is_authenticated:
                 return response(code=401, msg="token无效或过期")

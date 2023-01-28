@@ -11,7 +11,5 @@ USER root
 WORKDIR /root/
 ADD . .
 
-RUN rm -rf UI/node_modules
-
 EXPOSE 8000
 CMD python3 server.py

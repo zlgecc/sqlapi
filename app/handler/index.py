@@ -1,10 +1,8 @@
 # coding: utf-8
-from itertools import groupby
 from sanic import Blueprint
 from app.handler.base import login_required
 from app.sqlrest.query import Query
-from app.handler.base import success, error, hash_md5, encode_token
-from app import config
+from app.handler.base import success, error
 
 router = Blueprint("index")
 

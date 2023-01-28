@@ -1,6 +1,6 @@
 # coding: utf-8
 from sanic import Blueprint
-from app.handler.base import success, error, hash_md5, encode_token
+from app.handler.base import success
 from app import config
 
 router = Blueprint("table")

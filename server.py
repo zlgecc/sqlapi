@@ -10,6 +10,7 @@ from app.database import Database
 from app.log import set_logger
 from app.middleware import cors
 from app.router import routes
+from app import token
 
 import argparse
 
@@ -53,10 +54,21 @@ def server_init():
 
     # middleware
     @app.middleware("request")
-    async def cros(request):
+    async def before_request(request):
         if request.method == "OPTIONS":
             headers = cors.get_headers()
             return response.json({"code": 0}, headers=headers)
+        
+        # token 验证
+        jwt_token = request.cookies.get('token')
+        if not jwt_token:
+            jwt_token = request.headers.get('token')
+        is_authenticated = token.check_jwt(jwt_token)
+        open_auth = config.get('app.open_auth')
+        if request.path == '/auth':
+            return 
+        if open_auth and not is_authenticated:
+            return response.json({"code": 401, "msg": 'token无效或过期'})
 
 
     @app.middleware("response")
