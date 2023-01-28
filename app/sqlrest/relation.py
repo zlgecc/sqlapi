@@ -6,7 +6,7 @@ import re
 
 class Relation:
     ''' 连表信息 
-        jobs[$project_id=id, name,created_at]
+        jobs[project_id=id, name,created_at]
     '''
     def __init__(self, query):
         self.query = query
@@ -22,8 +22,13 @@ class Relation:
             raise ValueError("join格式错误")
         field_match = re.sub(r"[\[\]\{\}]", "", field_match)
         fields = field_match.split(",")
-        if len(fields) < 1 or fields[0].find("=") == -1:
-            raise ValueError("缺少join条件或字段")
+        if len(fields) < 1:
+            raise ValueError("关联表缺少字段")
+        if fields[0].find("=") == -1:
+            # 默认关联条件
+            master_key = f"{self.table}_id"
+            relate_key = 'id'
+            fields.insert(0, f"{master_key}={relate_key}")
 
         self.master_key, self.relate_key = fields[0].split("=")
         self.fields = [Field(i) for i in fields[1:]]

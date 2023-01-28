@@ -7,21 +7,12 @@ from app.handler.base import success, error, hash_md5, encode_token
 from app import config
 
 router = Blueprint("index")
-# ------------------------------test----------------------------------
-@router.route("/test", methods=['GET'])
-async def index(request):
-    db = request.app.db
-    res = await db.query("SELECT id,name FROM projects limit 10")
 
-    res = await db.table_insert("projects", {"name": "bbb"})
-    return success(res)
-# ------------------------------test----------------------------------
-
-
+# 查所有表结构
 @router.route("/api/tables")
 async def get_tables(request):
     db = request.app.db
-    database = config.get("mysql.db")
+    database = config.get("database.db")
     table_list = await db.query(f"SELECT table_name FROM information_schema.tables WHERE table_schema='{database}'")
     tables = {}
     for i in table_list:
@@ -39,7 +30,7 @@ async def query(request, table):
     query_string = request.query_string
     query = Query(table, query_string)
 
-    sql = query.to_sql(); print(sql)
+    sql = query.to_sql()
     # 1.主表查询
     data = await db.query(sql)
     # 根据field定义，做数据处理
@@ -51,9 +42,12 @@ async def query(request, table):
     for relation in query.relation:
         # master表外键所有id
         idhub = set([str(i[relation.master_key]) for i in data])
-        ids = ",".join(idhub)
+        if len(idhub) == 0:
+            continue
+        ids = ",".join([ f"'{i}'" for i in idhub])
         # 查子表数据
         sql = relation.to_sql() + f" WHERE {relation.relate_key} IN ({ids})"
+        print("SUBQUERY SQL>>>", sql)
         relation_data = await db.query(sql)
         query.data_convert(relation.fields, relation_data)
         # 合并数据

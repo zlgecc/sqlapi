@@ -11,6 +11,7 @@ class Sqlite:
         self.conn = None
     
     async def connect(self):
+        # self.conn = await aiosqlite.connect(self.database)
         self.conn = await aiosqlite.connect(self.database, loop=self.sanic.loop)
         def dict_factory(cursor, row):
             d = {}

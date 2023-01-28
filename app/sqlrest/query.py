@@ -7,7 +7,6 @@ from app.sqlrest.where import Where
 from app.sqlrest.field import Field
 from app.sqlrest.relation import Relation
 
-
 class Query:
     def __init__(self, table, query_string):
         if not table:
@@ -48,6 +47,8 @@ class Query:
                 
     def parse_where(self, key, value):
         if key in self.keywords:
+            return 
+        if value == "like.**":
             return 
         self.where.append(Where(key, value))
     
@@ -150,13 +151,15 @@ class Query:
         n = self.build_sql_node()
         sql = f"SELECT {n['field']} FROM {n['table']} {n['where']} {n['groupby']} {n['orderby']} {n['limit']}"
         sql = re.sub(r"\s+", " ", sql)
+        print("QUERY SQL>>>", sql)
         return sql
     
     # meta 函数 查询总数
     def to_count_sql(self):
         n = self.build_sql_node()
-        sql = f"SELECT count(1) cnt FROM {n['table']} {n['where']} {n['groupby']} {n['orderby']}"
+        sql = f"SELECT count(1) cnt FROM {n['table']} {n['where']} {n['groupby']}"
         sql = re.sub(r"\s+", " ", sql)
+        print("COUNT SQL>>>", sql)
         return sql
       
     # 插入sql
@@ -173,6 +176,7 @@ class Query:
             sql += (' ON DUPLICATE KEY UPDATE ' + ', '.join(['%s=VALUES(%s)' % (x, x) for x in keys]))
         # sqlalcheme parse bug
         sql = sql.replace(":", "\:")
+        print("INSERT SQL>>>", sql)
         return sql
     
     # 更新sql
@@ -189,6 +193,7 @@ class Query:
         sql += n['where']
         # sqlalcheme parse bug
         sql = sql.replace(":", "\:")
+        print("UPDATE SQL>>>", sql)
         return sql
 
     # 删除sql
@@ -197,6 +202,7 @@ class Query:
         sql = "DELETE FROM %s " % (self.table_name)
         sql += n['where']
         sql = sql.replace(':', '\:')
+        print("DELETE SQL>>>", sql)
         return sql
 
     def data2sqlvalue(self, data):
@@ -219,10 +225,3 @@ class Query:
             raise Exception("data type error")
         return length, keys, values
     
-
-if __name__ == "__main__":
-
-    query = Query('projects', "field=id,name, jobs[id=project_id, name]")
-    # query = Query('projects', "field=id,name&AND=(name=lte.10,mark=1)")
-    print(query.relation)
-    print(query.to_sql())

@@ -11,16 +11,11 @@ database:
   # 数据库类型
   # type: sqlite
   type: mysql
-  # host: localhost
-  # port: 3306
-  # user: root
-  # password:
-  # db: database
-  host: 192.168.9.7
-  port: 24777
+  host: localhost
+  port: 3306
   user: root
-  password: Aa123456
-  db: label_db
+  password:
+  db: database
 
 webUI:
   open: true
