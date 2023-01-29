@@ -48,8 +48,8 @@ class Sqlite:
     # 创建表
     async def create_table(self, table):
         sql = f'''CREATE TABLE `{table}`( 
-            `id` PRIMARY KEY NOT NULL,
-            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            `id` integer PRIMARY KEY autoincrement,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP
         ) '''
         print(">>>", sql)
         res = await self.execute(sql)

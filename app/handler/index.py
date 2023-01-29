@@ -54,10 +54,12 @@ async def post(request, table):
     query = Query(table, query_string)
     if query_string:
         sql = query.to_update_sql(data)
+        result = await db.execute(sql)
+        return success(result.rowcount)
     else:
         sql = query.to_insert_sql(data)
-    result = await db.execute(sql)
-    return success(result)
+        result = await db.execute(sql)
+        return success(result.lastrowid)
 
 # delete data
 @router.route("/api/<table>", methods=["DELETE"])
@@ -69,6 +71,6 @@ async def delete(request, table):
     query = Query(table, query_string)
     if query_string:
         result = await db.execute(query.to_delete_sql())
-        return success(result)
+        return success(result.rowcount)
     else:
         return error("ERROR: No query string")

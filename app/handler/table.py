@@ -10,8 +10,8 @@ router = Blueprint("table")
 async def create_table(request):
     db = request.app.db
     table = request.args.get('name')
-    tables = await db.create_table(table)
-    return success(tables)
+    res = await db.create_table(table)
+    return success(res.lastrowid)
 
 # 查所有表
 @router.route("/table", methods=["GET"])
