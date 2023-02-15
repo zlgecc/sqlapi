@@ -31,7 +31,7 @@ async def query(request, table):
             continue
         ids = ",".join([ f"'{i}'" for i in idhub])
         # 查子表数据
-        sql = relation.to_sql() + f" WHERE {relation.relate_key} IN ({ids})"
+        sql = relation.to_sql(f"{relation.relate_key} IN ({ids})")
         print("SUBQUERY SQL>>>", sql)
         relation_data = await db.query(sql)
         query.data_convert(relation.fields, relation_data)

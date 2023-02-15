@@ -39,14 +39,17 @@ class Relation:
             return True
         return False
 
-    def to_sql(self):
+    def to_sql(self, where=""):
         self.fields.append(Field(self.relate_key))
         field = ",".join([i.to_sql() for i in self.fields])
-        sql = f"SELECT {field} FROM {self.table}"
+        sql = f"SELECT {field} FROM {self.table} WHERE {where}"
         return sql
 
     def merge_table_data(self, data, relation_data):
         ''' 合并数据 '''
+         # relation table key
+        for i in data:
+            i[self.table] = [] if self.type == 1 else {}
         for id, value in groupby(relation_data, lambda x: x[self.relate_key]):
             item = filter(lambda x: x[self.master_key]==id, data)
             relation_item = None
