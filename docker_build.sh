@@ -1,5 +1,5 @@
 # build docker image
-registry="zlgecc/ra"
+registry="zlgecc/sra"
 
 docker build -t $registry .
 
