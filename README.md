@@ -1,4 +1,4 @@
-# Sql Rest API (SRA)
+# SQL api
 
 > 部署一个基于mysql,sqlite的后端API，通过http请求自动生成增删改查SQL语句，进行对数据库的数据操作
 
