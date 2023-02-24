@@ -51,12 +51,13 @@ class Relation:
         for i in data:
             i[self.table] = [] if self.type == 1 else {}
         for id, value in groupby(relation_data, lambda x: x[self.relate_key]):
-            item = filter(lambda x: x[self.master_key]==id, data)
+            source_data = filter(lambda x: x[self.master_key]==id, data)
             relation_item = None
             if self.type == 1:
                 relation_item = list(value)
             else:
                 relation_item = list(value)[0]
-            list(item)[0][self.table] = relation_item
+            for item in source_data:
+                item[self.table] = relation_item
             # print('---->', id, list(item))
         return data
