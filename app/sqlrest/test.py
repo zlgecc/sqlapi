@@ -10,6 +10,7 @@ query_list = [
     ['car', "field=id:iii,name,user{id,name}"],
     ['jobs', "field=id,name,projects{project_id=id,name}&id=81500331"],
     ['projects', "field=id,name,jobs[id=project_id,%20name]"],
+    # car   field=id,name,user(id=$user_id, name=audi){name},
 ]
 
 def testQuery():

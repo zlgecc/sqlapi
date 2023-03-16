@@ -3,3 +3,4 @@ sanic==20.12.3
 PyYAML==5.4.1
 aiomysql==0.0.21
 PyJWT==2.3.0
+aiosqlite==0.18.0
